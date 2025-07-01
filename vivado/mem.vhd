@@ -27,24 +27,24 @@ begin
   begin
     if rising_edge(clk) then
       if (rst_n = '0') then
-        memoria(0) <= "0101000000100000"; -- LOAD R4, 32 (Carrega valor 1 para R4)
-        memoria(1) <= "0101010000100010"; -- LOAD R5, 34 (Carrega valor 2 para R5)
+        -- Teste para LOAD_ADD: R4 = R4 + MEM(38)
+          memoria(0) <= "0101000000100000"; -- LOAD R4, 32   -> R4 = 2
+          memoria(1) <= "0111000000100110"; -- LOAD_ADD R4, 38  -> R4 = R4 + MEM(38) = 2 + 5 = 7
+        
+          -- Teste para SWAP_REG_MEM: Troca R5 com MEM(40)
+          memoria(2) <= "0101010000100010"; -- LOAD R5, 34   -> R5 = 2
+          memoria(3) <= "1000010000101000"; -- SWAP R5, 40   -> Troca R5 <-> MEM(40)
+        
+          memoria(4) <= "1111000000000000"; -- HALT
+        
+          -- Memória de dados
+          memoria(32) <= "0000000000000010"; -- 2
+          memoria(34) <= "0000000000000010"; -- 2
+          memoria(36) <= "0000000001100011"; -- 99
+          memoria(38) <= "0000000000000101"; -- 5 (para somar no LOAD_ADD)
+          memoria(40) <= "0000000000000011"; -- 3 (para trocar com R5)
 
-        -- Subtrair os valores
-        memoria(2) <= "0001010001010110"; -- SUB R6, R4, R5 (R6 = R4 - R5)
-
-        -- Armazenar o resultado na memória
-        memoria(3) <= "0110011000100100"; -- STORE R6, 36 (Armazena R6 em 36)
-
-        -- Finalizar o programa
-        memoria(4) <= "1111000000000000"; -- HALT
-
-        -- Dados na memória
-        memoria(32) <= "0000000000000001"; -- Valor 1 (endereço 32)
-        memoria(34) <= "0000000000000010"; -- Valor 2 (endereço 34)
-        memoria(36) <= "0000000000000000"; -- Resultado será armazenado aqui (endereço 36)
-
-        for i in 40 to 255 loop
+        for i in 50 to 255 loop
           memoria(i) <= (others => '0');
         end loop;
 
@@ -53,7 +53,8 @@ begin
         if (read = '1' and write = '0') then
           out_mem <= memoria(to_integer(unsigned(end_mem)));
           -------- Escrita na memoria
-        elsif (read = '0' and write = '1') then
+        --elsif (read = '0' and write = '1') then
+        else
           memoria(to_integer(unsigned(end_mem))) <= in_mem;
         end if;
       end if;
